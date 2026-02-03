@@ -2,7 +2,7 @@
 // Supabase Configuration
 // Replace with your actual project URL and public key from Supabase Dashboard
 const SUPABASE_URL = 'https://moanidwnrcynoedfrmah.supabase.co';
-const SUPABASE_KEY = 'VOTRE_CLE_PUBLIQUE_ANON_ICI'; // ⚠️ REMPLACER PAR LA CLÉ "ANON" (PUBLIC) DEPUIS SUPABASE DASHBOARD -> SETTINGS -> API
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vYW5pZHducmN5bm9lZGZybWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTMyNjAsImV4cCI6MjA4NTY4OTI2MH0.QYm8cnvc9-Q2rDNjza1UvnBpmwmrzs9fdFZipyEaOnU'; // ⚠️ REMPLACER PAR LA CLÉ "ANON" (PUBLIC) DEPUIS SUPABASE DASHBOARD -> SETTINGS -> API
 
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
@@ -15,3 +15,4 @@ if (!supabase) {
 }
 
 export { supabase };
+
