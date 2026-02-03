@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avis Clients | Mathilde Gest</title>
+    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/navigation.css?v=3">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .reviews-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .review-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+
+        .review-form {
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 4rem;
+        }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #ddd;
+        }
+
+        .star-rating input:checked~label,
+        .star-rating label:hover,
+        .star-rating label:hover~label {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER MOBILE -->
+    <div class="mobile-header">
+        <a href="index.html" class="mobile-logo">MATHILDE GEST</a>
+        <button class="burger-btn" id="burger-toggle">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+        </button>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+        <a href="index.html" class="sidebar-logo">
+            <div class="logo-text">Mat.<br>Gest</div>
+            <span class="logo-sub">Atelier Paris</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="categories.html">Créations</a></li>
+                <li><a href="piece-of-the-month.html">Le Mois</a></li>
+                <li><a href="contact.html">Atelier</a></li>
+                <li><a href="reviews.html" class="active">Avis Clients</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="auth-links" style="margin-bottom: 2rem;">
+                <a href="signup.html" class="btn btn-outline"
+                    style="display: block; text-align: center; margin-bottom: 0.5rem; padding: 0.8rem;">S'inscrire</a>
+                <a href="login.html" class="btn btn-primary"
+                    style="display: block; text-align: center; padding: 0.8rem;">Connexion</a>
+            </div>
+            <p style="font-size: 0.85rem; line-height: 1.6;">12 Rue de la Tapisserie<br>75000 Paris</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" style="padding: 4rem;">
+
+        <div class="reviews-container">
+            <h1 style="text-align: center; margin-bottom: 1rem;">Ce que disent nos clients</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 4rem;">Vos retours sont précieux et nous aident à
+                grandir.</p>
+
+            <!-- REVIEW LIST -->
+            <div id="reviews-list">
+                <p style="text-align: center;">Chargement des avis...</p>
+            </div>
+
+            <!-- REVIEW FORM -->
+            <div class="review-form">
+                <h3 style="margin-bottom: 1.5rem;">Laisser un avis</h3>
+                <form id="review-form">
+                    <div class="form-group">
+                        <label>Votre Nom</label>
+                        <input type="text" name="author_name" required
+                            style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Votre Note</label>
+                        <div class="star-rating" style="margin-bottom: 1rem;">
+                            <input type="radio" id="star5" name="rating" value="5" required /><label
+                                for="star5">★</label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Votre Commentaire</label>
+                        <textarea name="comment" rows="4" required
+                            style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Publier mon avis</button>
+                    <div id="review-feedback" style="margin-top: 1rem;"></div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const burger = document.getElementById('burger-toggle');
+        const sidebar = document.getElementById('sidebar');
+        if (burger && sidebar) {
+            burger.addEventListener('click', () => sidebar.classList.toggle('open'));
+        }
+    </script>
+
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module">
+        import { supabase } from './js/config.js';
+
+        // Load Reviews
+        async function loadReviews() {
+            const container = document.getElementById('reviews-list');
+
+            const { data, error } = await supabase
+                .from('reviews')
+                .select('*')
+                .eq('is_approved', true) // ONLY APPROVED REVIEWS
+                .order('created_at', { ascending: false });
+
+            if (data && data.length > 0) {
+                container.innerHTML = data.map(review => `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <strong>${review.author_name}</strong>
+                            <div class="stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                        </div>
+                        <p style="color: #444; line-height: 1.6;">${review.comment}</p>
+                        <small style="color: #999; display: block; margin-top: 1rem;">Publié le ${new Date(review.created_at).toLocaleDateString()}</small>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Soyez le premier à laisser un avis !</p>';
+            }
+        }
+
+        // Submit Review
+        document.getElementById('review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const feedback = document.getElementById('review-feedback');
+
+            btn.disabled = true;
+            btn.textContent = 'Envoi...';
+
+            const formData = new FormData(e.target);
+
+            try {
+                // Check if user is logged in (optional, but good for security)
+                const { data: { session } } = await supabase.auth.getSession();
+
+                // If you have strict RLS, you might need to handle anonymous submissions differently
+                // For now assuming RLS allows insert for everyone or authenticated users
+
+                const { error } = await supabase
+                    .from('reviews')
+                    .insert({
+                        author_name: formData.get('author_name'),
+                        rating: parseInt(formData.get('rating')),
+                        comment: formData.get('comment'),
+                        is_approved: false // Pending moderation
+                    });
+
+                if (error) throw error;
+
+                feedback.innerHTML = '<span style="color: green;">✅ Avis envoyé ! Il sera visible après modération.</span>';
+                e.target.reset();
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                feedback.innerHTML = '<span style="color: #c62828;">❌ Erreur lors de l\'envoi.</span>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Publier mon avis';
+            }
+        });
+
+        loadReviews();
+    </script>
+</body>
+
+</html>

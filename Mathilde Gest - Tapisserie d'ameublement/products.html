@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produits | Mathilde Gest</title>
+    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/navigation.css?v=3">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/product-manager.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <!-- HEADER MOBILE -->
+    <div class="mobile-header">
+        <a href="index.html" class="mobile-logo">MATHILDE GEST</a>
+        <button class="burger-btn" id="burger-toggle">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+        </button>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+        <a href="index.html" class="sidebar-logo">
+            <div class="logo-text">Mat.<br>Gest</div>
+            <span class="logo-sub">Atelier Paris</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="categories.html" class="active">Créations</a></li>
+                <li><a href="piece-of-the-month.html">Le Mois</a></li>
+                <li><a href="contact.html">Atelier</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <!-- Auth buttons - Dynamic based on user state -->
+            <div class="auth-links" style="margin-bottom: 2rem;">
+                <a href="signup.html" class="btn btn-outline"
+                    style="display: block; text-align: center; margin-bottom: 0.5rem; padding: 0.8rem;">S'inscrire</a>
+                <a href="login.html" class="btn btn-primary"
+                    style="display: block; text-align: center; padding: 0.8rem;">Connexion</a>
+            </div>
+            <p style="font-size: 0.85rem; line-height: 1.6;">12 Rue de la Tapisserie<br>75000 Paris</p>
+            <div style="font-size: 0.75rem; margin-top: 1rem;">
+                <a href="mentions-legales.html" style="text-decoration: underline;">Mentions Légales</a><br>
+                <a href="politique-confidentialite.html" style="text-decoration: underline;">Politique de
+                    Confidentialité</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="main-content" style="padding: 4rem;">
+        <h1 id="page-title">Nos Produits</h1>
+        <div class="product-grid">
+            <!-- Products will be injected here by main.js -->
+        </div>
+
+        <!-- Floating Add Product Button (Admin only) -->
+        <button id="add-product-btn" class="add-product-fab" title="Ajouter un produit">+</button>
+
+        <!-- Product Creation Modal -->
+        <div id="product-modal" class="product-modal">
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <h2>Créer un Nouveau Produit</h2>
+                <form id="product-form" class="product-form">
+                    <div class="form-group">
+                        <label for="product-title">Titre *</label>
+                        <input type="text" id="product-title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-description">Description *</label>
+                        <textarea id="product-description" name="description" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-price">Prix (€) *</label>
+                        <input type="number" id="product-price" name="price" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-category">Catégorie *</label>
+                        <select id="product-category" name="category" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="fauteuils">Fauteuils</option>
+                            <option value="canapes">Canapés</option>
+                            <option value="chaises">Chaises</option>
+                            <option value="rideaux">Rideaux & Voilages</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div id="image-dropzone" class="image-dropzone">
+                            <div class="icon">📸</div>
+                            <p>Glissez une image ici</p>
+                            <p style="font-size: 0.85rem; opacity: 0.7;">ou cliquez pour sélectionner</p>
+                        </div>
+                        <div id="image-preview"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancel-product" class="btn-secondary">Annuler</button>
+                        <button type="submit" class="btn-primary">Créer le Produit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mathilde Gest.</p>
+    </footer>
+
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/image-utils.js"></script>
+    <script type="module" src="js/admin.js"></script>
+    <script type="module" src="js/main.js"></script>
+
+    <!-- Inline script to handle category filtering logic for this demo -->
+    <script type="module">
+        import { supabase } from './js/config.js';
+
+        // Override loadProducts slightly to filter by category
+        const params = new URLSearchParams(window.location.search);
+        const category = params.get('category');
+
+        if (category) {
+            document.getElementById('page-title').innerText = category.charAt(0).toUpperCase() + category.slice(1);
+        }
+
+        async function loadFilteredProducts() {
+            const productGrid = document.querySelector('.product-grid');
+            if (!productGrid) return;
+
+            // Build query
+            let query = supabase.from('products').select('*');
+
+            // Filter by category if specified
+            if (category) {
+                query = query.eq('category', category);
+            }
+
+            const { data: products, error } = await query;
+
+            if (error) {
+                console.error('Error loading products:', error);
+                productGrid.innerHTML = '<p>Erreur lors du chargement des produits.</p>';
+                return;
+            }
+
+            if (!products || products.length === 0) {
+                productGrid.innerHTML = '<p>Aucun produit trouvé dans cette catégorie.</p>';
+                return;
+            }
+
+            productGrid.innerHTML = products.map(product => `
+                <article class="product-card">
+                    <img src="${product.image_url || 'assets/placeholder.svg'}" 
+                         alt="${product.title}" 
+                         data-product-id="${product.id}" 
+                         class="product-image"
+                         onerror="this.style.backgroundColor='#eaeaea'; this.style.minHeight='300px'; this.alt='Image non disponible'">
+                    <h3 data-product-id="${product.id}" data-product-field="title">${product.title}</h3>
+                    <p data-product-id="${product.id}" data-product-field="description">${product.description}</p>
+                    <span class="price" data-product-id="${product.id}" data-product-field="price">${product.price} €</span>
+                </article>
+            `).join('');
+
+            // Re-trigger admin mode if active
+            if (document.body.classList.contains('is-admin') && document.body.classList.contains('edit-mode-active')) {
+                window.dispatchEvent(new CustomEvent('admin-mode-enabled'));
+            }
+        }
+
+        loadFilteredProducts();
+    </script>
+</body>
+
+</html>
